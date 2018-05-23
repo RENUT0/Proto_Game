@@ -29,13 +29,25 @@ function preload ()
 var player;
 var floor;
 var batteries;
+
 var score = 0;
 var scoreText;
+
+var batt;			//battery capacity
+var battTimer;		//idle batrery timer
+
+var moving;
+var walkTimerStart;
+var walkTimerEnd;
+var battWalkTimer;	//counter for running power consumption
+var battText;
 
 var cursors;
 
 function create ()
 {
+	batt = 100;
+	
 	cursors = this.input.keyboard.createCursorKeys();
 	
 	player = this.physics.add.sprite(200,250,'player');
@@ -55,27 +67,59 @@ function create ()
 	
 	scoreText = this.add.text(16,16,'score: 0',{fontSize: '32px',fill: '#000'});
 	
+	battText = this.add.text(500,16,'Battery: ' + batt,{fontSize: '32px',fill: '#000'});
+	
+	setInterval(batteryDrain, 2000);
+	//clearInterval(batteryDrain); //how to stop this if need be later
+	
 }
 
 function update ()
 {
+	
+	//console.log(player.body.velocity.x);
+	
 	if (cursors.left.isDown)
 	{
 		player.setVelocityX(-160);
+		moving = true;
 	}
 	else if (cursors.right.isDown)
 	{
 		player.setVelocityX(160);
+		moving = true;
 	}
 	else
 	{
 		player.setVelocityX(0);
+		moving = false;
 	}
 
 	if (cursors.up.isDown && player.body.touching.down)
 	{
 		player.setVelocityY(-330);
+		moving = true;
 	}	
+	
+	if(cursors.left.isDown || cursors.right.isDown){
+		//use this shit https://www.w3schools.com/jsref/jsref_obj_date.asp
+	}
+	
+	if (battWalkTimer == 1000){
+		batteryDrain();
+		battWalkTimer == 0;
+	}
+	
+}
+
+function resetWalkTimers(){
+		walkTimerStart = 0;
+		walkTimerEnd   = 0;
+}
+
+function batteryDrain(){
+	batt -= 1;
+	battText.setText('Battery: ' + batt);
 }
 
 function collectBattery (player, batteries)
@@ -84,4 +128,7 @@ function collectBattery (player, batteries)
 
     score += 10;
     scoreText.setText('Score: ' + score);
+	
+	batt += 20;
+	battText.setText('Battery: ' + batt);
 }
